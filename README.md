@@ -549,6 +549,38 @@ const token = monk.getToken();
 monk.clearToken();
 ```
 
+## Direct HTTP Client Access
+
+For API endpoints that don't have dedicated bindings yet, you can access the underlying HTTP client directly:
+
+```typescript
+// GET request
+const response = await monk.client.get('/api/some/endpoint');
+
+// POST request
+const response = await monk.client.post('/api/some/endpoint', {
+  data: 'value'
+});
+
+// PUT request
+const response = await monk.client.put('/api/some/endpoint', {
+  data: 'value'
+});
+
+// DELETE request
+const response = await monk.client.delete('/api/some/endpoint');
+
+// Generic request with full control
+const response = await monk.client.request({
+  method: 'POST',
+  url: '/api/some/endpoint',
+  data: { ... },
+  headers: { ... }
+});
+```
+
+All client methods return the same `ApiResponse<T>` structure and automatically include the authentication token if set.
+
 ## License
 
 MIT
