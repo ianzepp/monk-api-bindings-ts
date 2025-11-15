@@ -1,6 +1,6 @@
 # monk-api-bindings-ts
 
-TypeScript bindings for the Monk API, providing type-safe access to Auth API and Data API endpoints.
+TypeScript bindings for the Monk API, providing type-safe access to Auth, Data, Find, and File API endpoints.
 
 ## Installation
 
@@ -256,6 +256,154 @@ const response = await monk.data.deleteAllRelated(
   'user-id-123',
   'posts'
 );
+```
+
+## Find API
+
+The Find API provides advanced search and filtering with 25+ operators.
+
+### Basic Find Query
+
+```typescript
+const response = await monk.find.find('users', {
+  where: {
+    status: 'active',
+    age: { $gte: 18 }
+  },
+  limit: 10,
+  order: 'created_at desc'
+});
+```
+
+### Find One Record
+
+```typescript
+const response = await monk.find.findOne('users', {
+  where: {
+    email: 'user@example.com'
+  }
+});
+```
+
+### Complex Filtering
+
+```typescript
+const response = await monk.find.find('users', {
+  where: {
+    $and: [
+      { status: 'active' },
+      { $or: [
+        { age: { $gte: 18, $lte: 65 } },
+        { role: 'admin' }
+      ]},
+      { name: { $like: 'John%' } }
+    ]
+  },
+  limit: 20,
+  order: ['priority desc', 'created_at asc']
+});
+```
+
+### Supported Operators
+
+**Comparison**: `$eq`, `$ne`, `$gt`, `$gte`, `$lt`, `$lte`
+**Arrays**: `$in`, `$nin`, `$any`, `$all`, `$size`
+**Pattern**: `$like`, `$ilike`, `$regex`
+**Logical**: `$and`, `$or`, `$not`, `$nand`, `$nor`
+**Text**: `$text`, `$search`
+**Range**: `$between`
+**Existence**: `$exists`, `$null`
+
+### Count Records
+
+```typescript
+const response = await monk.find.count('users', {
+  where: { status: 'active' }
+});
+
+if (response.success) {
+  console.log('Active users:', response.data);
+}
+```
+
+## File API
+
+The File API provides filesystem-style access to Monk data and schema definitions.
+
+### List Directory
+
+```typescript
+const response = await monk.file.list('/data/users', {
+  long_format: true,
+  sort_by: 'name',
+  sort_order: 'asc'
+});
+
+if (response.success) {
+  response.data?.entries.forEach(entry => {
+    console.log(entry.name, entry.file_type, entry.file_size);
+  });
+}
+```
+
+### Recursive Listing
+
+```typescript
+const response = await monk.file.list('/describe/users', {
+  recursive: true,
+  flat: true,
+  max_depth: -1
+});
+```
+
+### Retrieve File Content
+
+```typescript
+const response = await monk.file.retrieve('/data/users/user-1/email');
+
+if (response.success) {
+  console.log('Email:', response.data?.content);
+}
+```
+
+### Store File Content
+
+```typescript
+const response = await monk.file.store(
+  '/data/users/user-2/name',
+  'Alice Smith',
+  {
+    overwrite: true,
+    validate_schema: true
+  }
+);
+```
+
+### File Metadata
+
+```typescript
+const response = await monk.file.stat('/data/users/user-1/email');
+
+if (response.success) {
+  console.log('Size:', response.data?.file_metadata.size);
+  console.log('Modified:', response.data?.file_metadata.modified_time);
+}
+```
+
+### File Size
+
+```typescript
+const response = await monk.file.size('/data/users/user-1/email');
+
+if (response.success) {
+  console.log('Bytes:', response.data?.size);
+}
+```
+
+### Delete File or Record
+
+```typescript
+const response = await monk.file.delete('/data/users/user-2');
 ```
 
 ## Type Safety
