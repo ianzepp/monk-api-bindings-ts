@@ -1,0 +1,33 @@
+export { MonkClient } from './client.js';
+export { AuthAPI } from './api/auth.js';
+export { DataAPI } from './api/data.js';
+export * from './types/index.js';
+
+import { MonkClient } from './client.js';
+import { AuthAPI } from './api/auth.js';
+import { DataAPI } from './api/data.js';
+import type { MonkClientConfig } from './types/index.js';
+
+export class MonkAPI {
+  public client: MonkClient;
+  public auth: AuthAPI;
+  public data: DataAPI;
+
+  constructor(config: MonkClientConfig) {
+    this.client = new MonkClient(config);
+    this.auth = new AuthAPI(this.client);
+    this.data = new DataAPI(this.client);
+  }
+
+  setToken(token: string): void {
+    this.client.setToken(token);
+  }
+
+  getToken(): string | null {
+    return this.client.getToken();
+  }
+
+  clearToken(): void {
+    this.client.clearToken();
+  }
+}
