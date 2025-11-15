@@ -549,6 +549,69 @@ const token = monk.getToken();
 monk.clearToken();
 ```
 
+## Multi-Tenant Management
+
+Cache and switch between multiple tenant JWTs:
+
+```typescript
+// Store JWTs for different tenants
+monk.setTenant('root@system', 'jwt-token-for-root');
+monk.setTenant('tenant-a', 'jwt-token-for-tenant-a');
+monk.setTenant('tenant-b', 'jwt-token-for-tenant-b');
+
+// Switch to a specific tenant
+monk.useTenant('root@system');
+// All subsequent API calls now use root@system's JWT
+
+// Switch to another tenant
+monk.useTenant('tenant-a');
+// Now using tenant-a's JWT
+
+// Get current active tenant
+const current = monk.getCurrentTenant();
+// Returns: 'tenant-a'
+
+// List all cached tenants
+const tenants = monk.listTenants();
+// Returns: ['root@system', 'tenant-a', 'tenant-b']
+
+// Get JWT for specific tenant
+const token = monk.getTenant('root@system');
+
+// Clear a specific tenant
+monk.clearTenant('tenant-b');
+
+// Clear all cached tenants
+monk.clearAllTenants();
+```
+
+### Example: Multi-Tenant Workflow
+
+```typescript
+// Login to multiple tenants
+const rootLogin = await monk.auth.login({
+  tenant: 'system',
+  username: 'root@system',
+  password: 'password'
+});
+monk.setTenant('root@system', rootLogin.data.token);
+
+const tenantLogin = await monk.auth.login({
+  tenant: 'tenant-a',
+  username: 'user@tenant-a.com',
+  password: 'password'
+});
+monk.setTenant('tenant-a', tenantLogin.data.token);
+
+// Use root for admin operations
+monk.useTenant('root@system');
+await monk.data.createOne('tenants', { name: 'new-tenant' });
+
+// Switch to tenant-a for user operations
+monk.useTenant('tenant-a');
+await monk.data.createOne('users', { name: 'Alice' });
+```
+
 ## Direct HTTP Client Access
 
 For API endpoints that don't have dedicated bindings yet, you can access the underlying HTTP client directly:
