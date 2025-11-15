@@ -42,32 +42,4 @@ export class MonkAPI {
   clearToken(): void {
     this.client.clearToken();
   }
-
-  setTenant(name: string, token: string): void {
-    this.client.setTenant(name, token);
-  }
-
-  useTenant(name: string): void {
-    this.client.useTenant(name);
-  }
-
-  getTenant(name: string): string | undefined {
-    return this.client.getTenant(name);
-  }
-
-  getCurrentTenant(): string | null {
-    return this.client.getCurrentTenant();
-  }
-
-  listTenants(): string[] {
-    return this.client.listTenants();
-  }
-
-  clearTenant(name: string): void {
-    this.client.clearTenant(name);
-  }
-
-  clearAllTenants(): void {
-    this.client.clearAllTenants();
-  }
 }

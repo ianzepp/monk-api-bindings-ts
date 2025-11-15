@@ -4,8 +4,6 @@ import type { ApiResponse, MonkClientConfig } from './types/index.js';
 export class MonkClient {
   private axiosInstance: AxiosInstance;
   private token: string | null = null;
-  private tenants: Map<string, string> = new Map();
-  private currentTenant: string | null = null;
 
   constructor(config: MonkClientConfig) {
     this.axiosInstance = axios.create({
@@ -33,45 +31,6 @@ export class MonkClient {
   }
 
   clearToken(): void {
-    this.token = null;
-  }
-
-  setTenant(name: string, token: string): void {
-    this.tenants.set(name, token);
-  }
-
-  useTenant(name: string): void {
-    const token = this.tenants.get(name);
-    if (!token) {
-      throw new Error(`Tenant '${name}' not found. Use setTenant() first.`);
-    }
-    this.currentTenant = name;
-    this.token = token;
-  }
-
-  getTenant(name: string): string | undefined {
-    return this.tenants.get(name);
-  }
-
-  getCurrentTenant(): string | null {
-    return this.currentTenant;
-  }
-
-  listTenants(): string[] {
-    return Array.from(this.tenants.keys());
-  }
-
-  clearTenant(name: string): void {
-    this.tenants.delete(name);
-    if (this.currentTenant === name) {
-      this.currentTenant = null;
-      this.token = null;
-    }
-  }
-
-  clearAllTenants(): void {
-    this.tenants.clear();
-    this.currentTenant = null;
     this.token = null;
   }
 
