@@ -1,6 +1,6 @@
 # monk-api-bindings-ts
 
-TypeScript bindings for the Monk API, providing type-safe access to Auth, Data, Find, and File API endpoints.
+TypeScript bindings for the Monk API, providing type-safe access to Auth, Data, Find, File, and Aggregate API endpoints.
 
 ## Installation
 
@@ -405,6 +405,93 @@ if (response.success) {
 ```typescript
 const response = await monk.file.delete('/data/users/user-2');
 ```
+
+## Aggregate API
+
+The Aggregate API provides data aggregation and analytics with COUNT, SUM, AVG, MIN, MAX functions.
+
+### Basic Aggregation
+
+```typescript
+const response = await monk.aggregate.aggregate('orders', {
+  aggregate: {
+    total_orders: { $count: '*' },
+    total_revenue: { $sum: 'amount' }
+  }
+});
+
+if (response.success) {
+  console.log('Total Orders:', response.data?.[0]?.total_orders);
+  console.log('Total Revenue:', response.data?.[0]?.total_revenue);
+}
+```
+
+### Group By Single Column
+
+```typescript
+const response = await monk.aggregate.aggregate('orders', {
+  aggregate: {
+    order_count: { $count: '*' },
+    total_revenue: { $sum: 'amount' }
+  },
+  groupBy: 'status'
+});
+
+// Returns one row per status
+// { status: 'completed', order_count: 1247, total_revenue: 98750.25 }
+// { status: 'pending', order_count: 183, total_revenue: 14230.50 }
+```
+
+### Group By Multiple Columns
+
+```typescript
+const response = await monk.aggregate.aggregate('orders', {
+  aggregate: {
+    orders: { $count: '*' },
+    revenue: { $sum: 'amount' },
+    avg_order: { $avg: 'amount' }
+  },
+  groupBy: ['country', 'status']
+});
+```
+
+### Aggregation with Filtering
+
+```typescript
+const response = await monk.aggregate.aggregate('orders', {
+  where: {
+    status: 'completed',
+    created_at: { $gte: '2024-01-01' }
+  },
+  aggregate: {
+    total_orders: { $count: '*' },
+    total_revenue: { $sum: 'amount' },
+    avg_order_value: { $avg: 'amount' },
+    largest_order: { $max: 'amount' },
+    smallest_order: { $min: 'amount' }
+  }
+});
+```
+
+### Distinct Count
+
+```typescript
+const response = await monk.aggregate.aggregate('orders', {
+  aggregate: {
+    unique_customers: { $distinct: 'customer_id' },
+    unique_products: { $distinct: 'product_id' }
+  }
+});
+```
+
+### Available Aggregate Functions
+
+- **$count** - Count records (`{ $count: '*' }` or `{ $count: 'field' }`)
+- **$sum** - Sum numeric values (`{ $sum: 'amount' }`)
+- **$avg** - Average values (`{ $avg: 'price' }`)
+- **$min** - Minimum value (`{ $min: 'score' }`)
+- **$max** - Maximum value (`{ $max: 'created_at' }`)
+- **$distinct** - Count unique values (`{ $distinct: 'user_id' }`)
 
 ## Type Safety
 
